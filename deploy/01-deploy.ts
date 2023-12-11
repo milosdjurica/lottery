@@ -2,12 +2,15 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy, log } = hre.deployments;
+	const { ethers, getNamedAccounts, deployments } = hre;
+	const { deployer } = await getNamedAccounts();
+	const { deploy, log } = deployments;
+	const ticketPrice = ethers.parseEther("0.01");
+	console.log("ticketPrice", ticketPrice);
 
 	const lottery = await deploy("Lottery", {
 		from: deployer,
-		args: [], // ! constructor args
+		args: [ticketPrice], // ! constructor args
 		log: true,
 	});
 

@@ -14,6 +14,7 @@ contract Lottery {
 	error Lottery__NotEnoughETH();
 	error Lottery__NotOpen();
 	error Lottery__TransactionFailed();
+	error Lottery__AlreadyFull();
 
 	////////////////////
 	// * Types 		  //
@@ -36,12 +37,17 @@ contract Lottery {
 	////////////////////
 	// * Events 	  //
 	////////////////////
-	event LotteryEnter(address indexed player);
+	event LotteryEnter(address indexed player, uint indexed numOfPlayers);
 	event PickingWinner(LotteryState indexed lotteryState);
 
 	////////////////////
 	// * Modifiers 	  //
 	////////////////////
+	modifier stateIsOpen() {
+		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
+		_;
+	}
+
 	// TODO modifier -> can leave only if is already in players array
 
 	////////////////////
@@ -69,19 +75,20 @@ contract Lottery {
 	// * Public 	  //
 	////////////////////
 
-	function enterLottery() public payable {
+	function enterLottery() public payable stateIsOpen {
 		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
-		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
+		// ! I think this should never hit, but just in case
+		if (s_players.length > 3) revert Lottery__AlreadyFull();
 
 		s_players.push(payable(msg.sender));
-		emit LotteryEnter(msg.sender);
+		emit LotteryEnter(msg.sender, s_players.length);
 
 		if (s_players.length == 3) {
 			pickWinner();
 		}
 	}
 
-	function leave() public {}
+	function leave() public stateIsOpen {}
 
 	function pickWinnerEarlier() internal {
 		// only called if 2 players agree to start lottery earlier (not wait 3rd player, and play 1v1)
