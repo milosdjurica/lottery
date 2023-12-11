@@ -12,6 +12,7 @@ contract Lottery {
 	// * Errors 	  //
 	////////////////////
 	error Lottery__NotEnoughETH();
+	error Lottery__NotOpen();
 	error Lottery__TransactionFailed();
 
 	////////////////////
@@ -25,11 +26,14 @@ contract Lottery {
 	////////////////////
 	// * Variables	  //
 	////////////////////
-	address[] public s_players;
+	address payable[] public s_players;
+	uint private immutable i_ticketPrice;
+	LotteryState s_lotteryState;
 
 	////////////////////
 	// * Events 	  //
 	////////////////////
+	event LotteryEnter(address indexed player);
 
 	////////////////////
 	// * Modifiers 	  //
@@ -42,7 +46,11 @@ contract Lottery {
 	////////////////////
 	// * Constructor  //
 	////////////////////
-	constructor() {}
+	constructor(uint _ticketPrice) {
+		i_ticketPrice = _ticketPrice;
+
+		s_lotteryState = LotteryState.OPEN;
+	}
 
 	////////////////////////////
 	// * Receive & Fallback   //
@@ -55,6 +63,14 @@ contract Lottery {
 	////////////////////
 	// * Public 	  //
 	////////////////////
+
+	function enterLottery() public payable {
+		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
+		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
+
+		s_players.push(payable(msg.sender));
+		emit LotteryEnter(msg.sender);
+	}
 
 	////////////////////
 	// * Internal 	  //
