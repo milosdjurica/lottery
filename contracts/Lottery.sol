@@ -26,9 +26,9 @@ contract Lottery {
 	////////////////////
 	// * Variables	  //
 	////////////////////
-	address payable[] public s_players;
+	address payable[] private s_players;
 	uint private immutable i_ticketPrice;
-	LotteryState s_lotteryState;
+	LotteryState private s_lotteryState;
 
 	////////////////////
 	// * Events 	  //
@@ -69,12 +69,20 @@ contract Lottery {
 		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
 
 		s_players.push(payable(msg.sender));
+
+		if (s_players.length == 3) {
+			pickWinner();
+		}
 		emit LotteryEnter(msg.sender);
 	}
 
 	////////////////////
 	// * Internal 	  //
 	////////////////////
+	function pickWinner() internal {
+		s_lotteryState = LotteryState.CLOSED;
+		payable(msg.sender).transfer(address(this).balance);
+	}
 
 	////////////////////
 	// * Private 	  //
