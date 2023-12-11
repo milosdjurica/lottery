@@ -7,18 +7,25 @@ pragma solidity ^0.8.20;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract Example {
+contract Lottery {
 	////////////////////
 	// * Errors 	  //
 	////////////////////
+	error Lottery__NotEnoughETH();
+	error Lottery__TransactionFailed();
 
 	////////////////////
 	// * Types 		  //
 	////////////////////
+	enum LotteryState {
+		OPEN,
+		CLOSED
+	}
 
 	////////////////////
 	// * Variables	  //
 	////////////////////
+	address[] public s_players;
 
 	////////////////////
 	// * Events 	  //

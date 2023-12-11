@@ -13,9 +13,6 @@ deployments
 typechain
 typechain-types
 
-# Folder where i put notes
-a
-
 # files
 *.env
 *.log
@@ -25,4 +22,7 @@ coverage.json
 package-lock.json
 yarn.lock
 yarn*
-gas-report.txt
+gas-report*.txt
+
+# Folder where i put notes
+a
