@@ -26,18 +26,23 @@ contract Lottery {
 	////////////////////
 	// * Variables	  //
 	////////////////////
-	address payable[] private s_players;
+
 	uint private immutable i_ticketPrice;
+
 	LotteryState private s_lotteryState;
+	address payable[] private s_players;
+	mapping(address player => bool startEarly) public s_startEarly;
 
 	////////////////////
 	// * Events 	  //
 	////////////////////
 	event LotteryEnter(address indexed player);
+	event PickingWinner(LotteryState indexed lotteryState);
 
 	////////////////////
 	// * Modifiers 	  //
 	////////////////////
+	// TODO modifier -> can leave only if is already in players array
 
 	////////////////////
 	// * Functions	  //
@@ -69,11 +74,17 @@ contract Lottery {
 		if (s_lotteryState != LotteryState.OPEN) revert Lottery__NotOpen();
 
 		s_players.push(payable(msg.sender));
+		emit LotteryEnter(msg.sender);
 
 		if (s_players.length == 3) {
 			pickWinner();
 		}
-		emit LotteryEnter(msg.sender);
+	}
+
+	function leave() public {}
+
+	function pickWinnerEarlier() internal {
+		// only called if 2 players agree to start lottery earlier (not wait 3rd player, and play 1v1)
 	}
 
 	////////////////////
@@ -81,6 +92,7 @@ contract Lottery {
 	////////////////////
 	function pickWinner() internal {
 		s_lotteryState = LotteryState.CLOSED;
+		emit PickingWinner(s_lotteryState);
 		payable(msg.sender).transfer(address(this).balance);
 	}
 
