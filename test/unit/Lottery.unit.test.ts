@@ -1,7 +1,7 @@
 import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { developmentChains, networkConfig } from "../../utils/helper-config";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
-import { assert } from "chai";
+import { assert, expect } from "chai";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 
@@ -29,6 +29,39 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			describe("Constructor Tests", () => {
 				it("Sets ticket price correctly", async () => {
 					assert.equal(TICKET_PRICE, await lottery.getTicketPrice());
+				});
+
+				it("Sets the VRFCoordinator correctly", async () => {
+					assert.equal(
+						await vrfCoordinatorMock.getAddress(),
+						await lottery.getVrfCoordinator(),
+					);
+				});
+
+				it("Sets lottery state to OPEN", async () => {
+					assert.equal(0, Number(await lottery.getLotteryState()));
+				});
+
+				it("Sets max number of players correctly", async () => {
+					assert.equal(
+						MAX_NUM_PLAYERS,
+						Number(await lottery.getMaxNumOfPlayers()),
+					);
+				});
+			});
+
+			describe("Enter Lottery Tests", () => {
+				it("Reverts if more accounts than max number", async () => {
+					const accounts = await ethers.getSigners();
+					for (let i = 0; i < MAX_NUM_PLAYERS; i++) {
+						const lotteryConnected = lottery.connect(accounts[i]);
+						await lottery.enterLottery({ value: TICKET_PRICE });
+					}
+					await expect(
+						lottery.enterLottery({
+							value: TICKET_PRICE,
+						}),
+					).to.be.revertedWithCustomError(lottery, "Lottery__AlreadyFull");
 				});
 			});
 		});

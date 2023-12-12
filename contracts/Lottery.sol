@@ -114,7 +114,8 @@ contract Lottery is VRFConsumerBaseV2 {
 
 	function enterLottery() public payable stateIsOpen {
 		// ! I think this should never hit, but just in case
-		if (s_players.length > i_maxNumOfPlayers) revert Lottery__AlreadyFull();
+		if (s_players.length >= i_maxNumOfPlayers)
+			revert Lottery__AlreadyFull();
 		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
 		// give money back if they pay more than ticket price
 		if (msg.value > i_ticketPrice) {
@@ -192,6 +193,7 @@ contract Lottery is VRFConsumerBaseV2 {
 			NUM_WORDS
 		);
 		emit RequestedNumber(requestId);
+		s_lotteryState = LotteryState.OPEN;
 	}
 
 	// ! This function executes after requested number is created
@@ -218,5 +220,25 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	function getTicketPrice() public view returns (uint) {
 		return i_ticketPrice;
+	}
+
+	function getVrfCoordinator()
+		public
+		view
+		returns (VRFCoordinatorV2Interface)
+	{
+		return i_vrfCoordinator;
+	}
+
+	function getLotteryState() public view returns (LotteryState) {
+		return s_lotteryState;
+	}
+
+	function getMaxNumOfPlayers() public view returns (uint) {
+		return i_maxNumOfPlayers;
+	}
+
+	function getNumOfActivePlayers() public view returns (uint) {
+		return s_players.length;
 	}
 }
