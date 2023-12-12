@@ -19,6 +19,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	error Lottery__TransactionFailed();
 	error Lottery__AlreadyFull();
 	error Lottery__TransferFailed();
+	error Lottery__PlayerNotInArray(address player);
 
 	////////////////////
 	// * Types 		  //
@@ -57,6 +58,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	event PickingWinner(LotteryState indexed lotteryState);
 	event WinnerPicked(address indexed winner);
 	event RequestedNumber(uint indexed requestId);
+	event PlayerLeft(address indexed player, uint indexed numPlayersLeft);
 
 	////////////////////
 	// * Modifiers 	  //
@@ -121,7 +123,23 @@ contract Lottery is VRFConsumerBaseV2 {
 	}
 
 	function leave() public stateIsOpen {
-		// player can leave and get his money back if he doesnt want to wait for others anymore
+		uint indexToRemove = type(uint).max;
+		uint playersLength = s_players.length;
+
+		for (uint i = 0; i < playersLength; i++) {
+			if (s_players[i] == msg.sender) {
+				indexToRemove = i;
+				break;
+			}
+		}
+
+		if (indexToRemove > playersLength)
+			revert Lottery__PlayerNotInArray(msg.sender);
+
+		// ! Put acc to remove on the end of array and pop it out
+		s_players[indexToRemove] = s_players[playersLength - 1];
+		s_players.pop();
+		emit PlayerLeft(msg.sender, playersLength - 1);
 	}
 
 	function pickWinnerEarlier() internal {
