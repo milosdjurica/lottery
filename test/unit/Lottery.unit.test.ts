@@ -109,9 +109,19 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				});
 
 				// Coverage ->  44.74 |    35.71 |    64.29 |    46.77
-				it("Panic revert if accessing non-existing player", async () => {
+				it("Panic revert if accessing non-existing index", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await expect(lottery.getPlayer(1)).to.be.revertedWithPanic(0x32);
+				});
+
+				// Coverage -> 46.15 |    35.71 |    66.67 |    47.62
+				it("Player enters with WantsToStartEarly.NO", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+
+					assert.equal(
+						await lottery.getPlayerWantsToStart(deployer),
+						BigInt(1),
+					);
 				});
 			});
 		});

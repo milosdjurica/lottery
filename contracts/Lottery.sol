@@ -245,4 +245,10 @@ contract Lottery is VRFConsumerBaseV2 {
 	function getPlayer(uint index) public view returns (address) {
 		return s_players[index];
 	}
+
+	function getPlayerWantsToStart(
+		address player
+	) public view returns (WantToStartEarly) {
+		return s_playersAgreeToPickEarlier[player];
+	}
 }
