@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { developmentChains, networkConfig } from "../utils/helper-config";
 import { VRFCoordinatorV2Mock } from "../typechain-types";
 import { EventLog } from "ethers";
+import { verify } from "../utils/verify";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	const { ethers, getNamedAccounts, deployments, network } = hre;
@@ -11,6 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	const ticketPrice = ethers.parseEther("0.01");
 	const chainId = network.config.chainId!;
 	// console.log("ticketPrice", ticketPrice);
+	const DEV_CHAIN = developmentChains.includes(network.name);
 
 	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
 
@@ -22,7 +24,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock;
 	let vrfCoordinatorV2Address: string;
 
-	if (developmentChains.includes(network.name)) {
+	if (DEV_CHAIN) {
 		vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
 		vrfCoordinatorV2Address = await vrfCoordinatorV2Mock.getAddress();
 		const txResponse = await vrfCoordinatorV2Mock.createSubscription();
@@ -37,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 		subscriptionId = networkConfig[chainId].subscriptionId;
 	}
 
-	const BLOCK_CONFIRMATIONS = developmentChains.includes(network.name) ? 1 : 3;
+	const BLOCK_CONFIRMATIONS = DEV_CHAIN ? 1 : 3;
 
 	const constructorArgs = [
 		vrfCoordinatorV2Address,
@@ -56,6 +58,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	});
 
 	log(`Lottery contract: `, lottery.address);
+	log("===============================================================");
+
+	if (!DEV_CHAIN && process.env.ETHERSCAN_API_KEY) {
+		log("Verifying contract....");
+		verify(lottery.address, constructorArgs);
+	} else {
+		// ! Have to add consumer to Mock in order to work
+		if (!vrfCoordinatorV2Mock!)
+			vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
+
+		await vrfCoordinatorV2Mock.addConsumer(subscriptionId, lottery.address);
+	}
 };
 export default func;
 func.id = "deploy_example"; // id required to prevent re-execution
