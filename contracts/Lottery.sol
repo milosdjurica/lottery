@@ -104,6 +104,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
 		// ! I think this should never hit, but just in case
 		if (s_players.length > 3) revert Lottery__AlreadyFull();
+		// TODO give money back if they pay more than ticket price
 
 		s_players.push(payable(msg.sender));
 		emit LotteryEnter(msg.sender, s_players.length);
