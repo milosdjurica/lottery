@@ -29,6 +29,11 @@ contract Lottery is VRFConsumerBaseV2 {
 		CLOSED
 	}
 
+	enum WantToStartEarly {
+		NONE,
+		NO,
+		YES
+	}
 	////////////////////
 	// * Variables	  //
 	////////////////////
@@ -48,7 +53,8 @@ contract Lottery is VRFConsumerBaseV2 {
 	// * Storage
 	address payable[] private s_players;
 	LotteryState private s_lotteryState;
-	mapping(address player => bool startEarly) public s_startEarly;
+	mapping(address player => WantToStartEarly startEarly)
+		public s_playersAgreeToPickEarlier;
 	address private s_recentWinner;
 
 	////////////////////
@@ -115,6 +121,7 @@ contract Lottery is VRFConsumerBaseV2 {
 			payable(msg.sender).transfer(msg.value - i_ticketPrice);
 		}
 		s_players.push(payable(msg.sender));
+		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.NO;
 		emit LotteryEnter(msg.sender, s_players.length);
 
 		if (s_players.length == i_maxNumOfPlayers) {
@@ -123,6 +130,10 @@ contract Lottery is VRFConsumerBaseV2 {
 	}
 
 	function leave() public stateIsOpen {
+		// ! Closing so last player cant enter while someone is leaving
+		// ! (it would trigger picking winner earlier)
+		s_lotteryState = LotteryState.CLOSED;
+
 		uint indexToRemove = type(uint).max;
 		uint playersLength = s_players.length;
 
@@ -140,16 +151,35 @@ contract Lottery is VRFConsumerBaseV2 {
 		s_players[indexToRemove] = s_players[playersLength - 1];
 		s_players.pop();
 		emit PlayerLeft(msg.sender, playersLength - 1);
+		// Have to put it back to NONE so he cant call pick early when he is not in lottery
+		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.NONE;
+		s_lotteryState = LotteryState.OPEN;
 	}
 
-	function pickWinnerEarlier() internal {
-		// only called if 2 players agree to start lottery earlier (not wait 3rd player, and play 1v1)
-		// if both agree call pickWinner()
+	function pickWinnerEarlier() external stateIsOpen {
+		s_lotteryState = LotteryState.CLOSED;
+		if (s_playersAgreeToPickEarlier[msg.sender] == WantToStartEarly.NONE)
+			revert Lottery__PlayerNotInArray(msg.sender);
+
+		// change mapping to true
+		// check if everyone is true
+		// if yes call
+		// if not then wait for others...
+		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.YES;
+		// emit player wants to start earlier
+		bool canStartEarly = allPlayersAgreeToStartEarly();
+		// emit if cant start
+		if (canStartEarly) pickWinner();
+
+		s_lotteryState = LotteryState.OPEN;
 	}
 
 	////////////////////
 	// * Internal 	  //
 	////////////////////
+
+	function allPlayersAgreeToStartEarly() internal returns (bool) {}
+
 	function pickWinner() internal {
 		s_lotteryState = LotteryState.CLOSED;
 		emit PickingWinner(s_lotteryState);
