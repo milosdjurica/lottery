@@ -10,7 +10,7 @@
 	},
 	"include": [
 		"./hardhat.config.ts",
-		"utils/helper-config.ts",
+		"./utils/helper-config.ts",
 		"./scripts",
 		"./deploy",
 		"deploy",
