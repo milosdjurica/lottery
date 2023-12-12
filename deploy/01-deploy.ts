@@ -5,26 +5,27 @@ import { VRFCoordinatorV2Mock } from "../typechain-types";
 import { EventLog } from "ethers";
 import { verify } from "../utils/verify";
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployLottery: DeployFunction = async function (
+	hre: HardhatRuntimeEnvironment,
+) {
 	const { ethers, getNamedAccounts, deployments, network } = hre;
 	const { deployer } = await getNamedAccounts();
 	const { deploy, log } = deployments;
-	const ticketPrice = ethers.parseEther("0.01");
-	const chainId = network.config.chainId!;
-	// console.log("ticketPrice", ticketPrice);
-	const DEV_CHAIN = developmentChains.includes(network.name);
-	const MAX_NUM_OF_PLAYERS = 3;
-	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
+	const CHAIN_ID = network.config.chainId!;
 
-	const TICKET_PRICE = networkConfig[chainId].lotteryTicketPrice;
-	const gasLane = networkConfig[chainId].gasLane;
-	const callbackGasLimit = networkConfig[chainId].callbackGasLimit;
-	let subscriptionId = networkConfig[chainId].subscriptionId;
+	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
+	const IS_DEV_CHAIN = developmentChains.includes(network.name);
+
+	const TICKET_PRICE = networkConfig[CHAIN_ID].lotteryTicketPrice;
+	const GAS_LANE = networkConfig[CHAIN_ID].gasLane;
+	const CALLBACK_GAS_LIMIT = networkConfig[CHAIN_ID].callbackGasLimit;
+	const MAX_NUM_OF_PLAYERS = networkConfig[CHAIN_ID].maxNumOfPlayers;
+	let subscriptionId = networkConfig[CHAIN_ID].subscriptionId;
 
 	let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock;
 	let vrfCoordinatorV2Address: string;
 
-	if (DEV_CHAIN) {
+	if (IS_DEV_CHAIN) {
 		vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
 		vrfCoordinatorV2Address = await vrfCoordinatorV2Mock.getAddress();
 		const txResponse = await vrfCoordinatorV2Mock.createSubscription();
@@ -35,18 +36,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 			VRF_SUB_FUND_AMOUNT,
 		);
 	} else {
-		vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2!;
-		subscriptionId = networkConfig[chainId].subscriptionId;
+		vrfCoordinatorV2Address = networkConfig[CHAIN_ID].vrfCoordinatorV2!;
+		subscriptionId = networkConfig[CHAIN_ID].subscriptionId;
 	}
 
-	const BLOCK_CONFIRMATIONS = DEV_CHAIN ? 1 : 3;
+	const BLOCK_CONFIRMATIONS = IS_DEV_CHAIN ? 1 : 3;
 
 	const constructorArgs = [
 		vrfCoordinatorV2Address,
 		TICKET_PRICE,
-		gasLane,
+		GAS_LANE,
 		subscriptionId,
-		callbackGasLimit,
+		CALLBACK_GAS_LIMIT,
 		MAX_NUM_OF_PLAYERS,
 	];
 
@@ -61,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	log(`Lottery contract: `, lottery.address);
 	log("===============================================================");
 
-	if (!DEV_CHAIN && process.env.ETHERSCAN_API_KEY) {
+	if (!IS_DEV_CHAIN && process.env.ETHERSCAN_API_KEY) {
 		log("Verifying contract....");
 		verify(lottery.address, constructorArgs);
 	} else {
@@ -72,6 +73,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 		await vrfCoordinatorV2Mock.addConsumer(subscriptionId, lottery.address);
 	}
 };
-export default func;
-func.id = "deploy_example"; // id required to prevent re-execution
-func.tags = ["lottery", "all"];
+export default deployLottery;
+deployLottery.id = "deploy_example"; // id required to prevent re-execution
+deployLottery.tags = ["lottery", "all"];
