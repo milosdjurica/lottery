@@ -63,5 +63,18 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						}),
 					).to.be.revertedWithCustomError(lottery, "Lottery__AlreadyFull");
 				});
+
+				it("Reverts if called without money", async () => {
+					await expect(lottery.enterLottery()).to.be.revertedWithCustomError(
+						lottery,
+						"Lottery__NotEnoughETH",
+					);
+				});
+
+				it("Reverts if not enough ETH sent", async () => {
+					await expect(
+						lottery.enterLottery({ value: TICKET_PRICE - BigInt(1) }),
+					).to.be.revertedWithCustomError(lottery, "Lottery__NotEnoughETH");
+				});
 			});
 		});
