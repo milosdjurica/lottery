@@ -123,5 +123,15 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						BigInt(1),
 					);
 				});
+
+				it("Emits that player entered lottery", async () => {
+					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
+						.to.emit(lottery, "LotteryEnter")
+						.withArgs(deployer, 1);
+				});
 			});
+
+			// for picking winner beforeEach -> when everyone is there
+			// or everyone agrees to pick earlier
+			// check both
 		});
