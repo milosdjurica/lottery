@@ -1,6 +1,7 @@
-import { network } from "hardhat";
+import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { developmentChains, networkConfig } from "../../utils/helper-config";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
+import { assert } from "chai";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 
@@ -14,4 +15,20 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			let lottery: Lottery;
 			let deployer: string;
 			let vrfCoordinatorMock: VRFCoordinatorV2Mock;
+
+			beforeEach(async () => {
+				await deployments.fixture(["all"]);
+				deployer = (await getNamedAccounts()).deployer;
+				vrfCoordinatorMock = await ethers.getContract(
+					"VRFCoordinatorV2Mock",
+					deployer,
+				);
+				lottery = await ethers.getContract("Lottery", deployer);
+			});
+
+			describe("Constructor Tests", () => {
+				it("Sets ticket price correctly", async () => {
+					assert.equal(TICKET_PRICE, await lottery.getTicketPrice());
+				});
+			});
 		});

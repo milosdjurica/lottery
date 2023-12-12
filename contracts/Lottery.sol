@@ -216,4 +216,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 	// * View & Pure  //
 	////////////////////
+	function getTicketPrice() public view returns (uint) {
+		return i_ticketPrice;
+	}
 }
