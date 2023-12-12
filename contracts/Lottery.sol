@@ -160,17 +160,9 @@ contract Lottery is VRFConsumerBaseV2 {
 		s_lotteryState = LotteryState.CLOSED;
 		if (s_playersAgreeToPickEarlier[msg.sender] == WantToStartEarly.NONE)
 			revert Lottery__PlayerNotInArray(msg.sender);
-
-		// change mapping to true
-		// check if everyone is true
-		// if yes call
-		// if not then wait for others...
 		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.YES;
-		// emit player wants to start earlier
-		bool canStartEarly = allPlayersAgreeToStartEarly();
-		// emit if cant start
-		if (canStartEarly) pickWinner();
-
+		if (allPlayersAgreeToStartEarly()) pickWinner();
+		// TODO maybe emit if players dont wanna start
 		s_lotteryState = LotteryState.OPEN;
 	}
 
@@ -178,7 +170,16 @@ contract Lottery is VRFConsumerBaseV2 {
 	// * Internal 	  //
 	////////////////////
 
-	function allPlayersAgreeToStartEarly() internal returns (bool) {}
+	function allPlayersAgreeToStartEarly() internal view returns (bool) {
+		uint playersLength = s_players.length;
+		for (uint i = 0; i < playersLength; i++) {
+			if (
+				s_playersAgreeToPickEarlier[s_players[i]] !=
+				WantToStartEarly.YES
+			) return false;
+		}
+		return true;
+	}
 
 	function pickWinner() internal {
 		s_lotteryState = LotteryState.CLOSED;
