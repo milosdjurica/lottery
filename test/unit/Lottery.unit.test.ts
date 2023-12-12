@@ -97,6 +97,10 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				it("Contract should only take ticket price fee", async () => {});
+				// Coverage ->  43.24 |    35.71 |    61.54 |     45.9 |
+				it("Contract should only take ticket price fee", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE * BigInt(2) });
+					assert.equal(await ethers.provider.getBalance(lottery), TICKET_PRICE);
+				});
 			});
 		});
