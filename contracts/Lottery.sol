@@ -6,6 +6,7 @@ pragma solidity ^0.8.20;
 ////////////////////
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
+
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
@@ -41,6 +42,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	bytes32 private immutable i_gasLane;
 	uint64 private immutable i_subscriptionId;
 	uint32 private immutable i_callbackGasLimit;
+	uint private immutable i_maxNumOfPlayers;
 
 	// * Storage
 	address payable[] private s_players;
@@ -78,7 +80,8 @@ contract Lottery is VRFConsumerBaseV2 {
 		uint _ticketPrice,
 		bytes32 _gasLane,
 		uint64 _subscriptionId,
-		uint32 _callbackGasLimit
+		uint32 _callbackGasLimit,
+		uint _maxNumOfPlayers
 	) VRFConsumerBaseV2(_vrfCoordinator) {
 		i_ticketPrice = _ticketPrice;
 		i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
@@ -86,6 +89,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		i_callbackGasLimit = _callbackGasLimit;
 		i_gasLane = _gasLane;
 		s_lotteryState = LotteryState.OPEN;
+		i_maxNumOfPlayers = _maxNumOfPlayers;
 	}
 
 	////////////////////////////
@@ -101,15 +105,17 @@ contract Lottery is VRFConsumerBaseV2 {
 	////////////////////
 
 	function enterLottery() public payable stateIsOpen {
-		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
 		// ! I think this should never hit, but just in case
-		if (s_players.length > 3) revert Lottery__AlreadyFull();
-		// TODO give money back if they pay more than ticket price
-
+		if (s_players.length > i_maxNumOfPlayers) revert Lottery__AlreadyFull();
+		if (msg.value < i_ticketPrice) revert Lottery__NotEnoughETH();
+		// give money back if they pay more than ticket price
+		if (msg.value > i_ticketPrice) {
+			payable(msg.sender).transfer(msg.value - i_ticketPrice);
+		}
 		s_players.push(payable(msg.sender));
 		emit LotteryEnter(msg.sender, s_players.length);
 
-		if (s_players.length == 3) {
+		if (s_players.length == i_maxNumOfPlayers) {
 			pickWinner();
 		}
 	}

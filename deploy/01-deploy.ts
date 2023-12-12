@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 	const chainId = network.config.chainId!;
 	// console.log("ticketPrice", ticketPrice);
 	const DEV_CHAIN = developmentChains.includes(network.name);
-
+	const MAX_NUM_OF_PLAYERS = 3;
 	const VRF_SUB_FUND_AMOUNT = ethers.parseEther("2");
 
 	const TICKET_PRICE = networkConfig[chainId].lotteryTicketPrice;
@@ -47,6 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 		gasLane,
 		subscriptionId,
 		callbackGasLimit,
+		MAX_NUM_OF_PLAYERS,
 	];
 
 	log("Deploying lottery contract....");
