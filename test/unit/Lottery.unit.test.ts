@@ -76,5 +76,27 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						lottery.enterLottery({ value: TICKET_PRICE - BigInt(1) }),
 					).to.be.revertedWithCustomError(lottery, "Lottery__NotEnoughETH");
 				});
+
+				// Coverage ->  43.24 |    35.71 |    61.54 |     45.9 |
+				it("Should return if extra money sent", async () => {
+					const deployerBalanceBefore =
+						await ethers.provider.getBalance(deployer);
+					const txResponse = await lottery.enterLottery({
+						value: TICKET_PRICE * BigInt(2),
+					});
+					const txReceipt = await txResponse.wait(1);
+					const gasPrice = txReceipt?.gasPrice!;
+					const gasUsed = txReceipt?.gasUsed!;
+					const totalCost = gasUsed * gasPrice;
+					const deployerBalanceAfter =
+						await ethers.provider.getBalance(deployer);
+
+					assert.equal(
+						deployerBalanceBefore - TICKET_PRICE - totalCost,
+						deployerBalanceAfter,
+					);
+				});
+
+				it("Contract should only take ticket price fee", async () => {});
 			});
 		});
