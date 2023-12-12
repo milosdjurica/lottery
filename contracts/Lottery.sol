@@ -241,4 +241,8 @@ contract Lottery is VRFConsumerBaseV2 {
 	function getNumOfActivePlayers() public view returns (uint) {
 		return s_players.length;
 	}
+
+	function getPlayer(uint index) public view returns (address) {
+		return s_players[index];
+	}
 }

@@ -102,5 +102,16 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					await lottery.enterLottery({ value: TICKET_PRICE * BigInt(2) });
 					assert.equal(await ethers.provider.getBalance(lottery), TICKET_PRICE);
 				});
+
+				it("Adds player to array of players", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					assert.equal(await lottery.getPlayer(0), deployer);
+				});
+
+				// Coverage ->  44.74 |    35.71 |    64.29 |    46.77
+				it("Panic revert if accessing non-existing player", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await expect(lottery.getPlayer(1)).to.be.revertedWithPanic(0x32);
+				});
 			});
 		});
