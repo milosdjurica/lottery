@@ -124,6 +124,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
+				// Coverage -> 46.15 |    35.71 |    66.67 |    47.62
 				it("Emits that player entered lottery", async () => {
 					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
 						.to.emit(lottery, "LotteryEnter")
@@ -134,4 +135,24 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			// for picking winner beforeEach -> when everyone is there
 			// or everyone agrees to pick earlier
 			// check both
+			describe("Leave Lottery Tests", () => {
+				beforeEach(async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+				});
+
+				// Coverage -> 58.97 |    46.43 |    73.33 |    58.73
+				it("Reverts if player calling leave() is not in array", async () => {
+					// ! Not using deployer because he entered lottery in beforeEach
+					const playerNotInArray = (await ethers.getSigners())[1];
+					const playerLottery = lottery.connect(playerNotInArray);
+					const playerAddress = await playerNotInArray.getAddress();
+
+					await expect(playerLottery.leave())
+						.to.be.revertedWithCustomError(
+							playerLottery,
+							"Lottery__PlayerNotInArray",
+						)
+						.withArgs(playerAddress);
+				});
+			});
 		});
