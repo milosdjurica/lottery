@@ -148,7 +148,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		if (indexToRemove > playersLength)
 			revert Lottery__PlayerNotInArray(msg.sender);
 
-		// ! Put acc to remove on the end of array and pop it out
+		// ! Put last acc in place of acc that should be removed and pop() duplicate
 		s_players[indexToRemove] = s_players[playersLength - 1];
 		s_players.pop();
 		emit PlayerLeft(msg.sender, playersLength - 1);

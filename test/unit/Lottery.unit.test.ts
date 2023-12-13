@@ -138,7 +138,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			// or everyone agrees to pick earlier
 			// check both
 			describe("Leave Lottery Tests", () => {
-				const NUM_OF_ACTIVE_PLAYERS = 3;
+				const NUM_OF_ACTIVE_PLAYERS = 4;
 
 				beforeEach(async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
@@ -163,10 +163,15 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(playerAddress);
 				});
 
-				it("Puts last player on index", async () => {});
-				it("Removes indexed player", async () => {});
-				it("Compare whole arrays", async () => {});
-				it("Emits event", async () => {});
-				it("Agreed to pick earlier back to NONE (because he isnt active player anymore)", async () => {});
+				// Coverage ->   66.67 |    53.57 |       80 |    71.43
+				it("Compares length of arrays before and after leaving", async () => {
+					const numBefore = await lottery.getNumOfActivePlayers();
+					await lottery.leave();
+					const numAfter = await lottery.getNumOfActivePlayers();
+					assert.equal(numBefore - BigInt(1), numAfter);
+				});
+				// it("Compare whole arrays", async () => {});
+				// it("Agreed to pick earlier back to NONE (because he isnt active player anymore)", async () => {});
+				// it("Emits event", async () => {});
 			});
 		});
