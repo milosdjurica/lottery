@@ -34,7 +34,9 @@ export const networkConfig: NetworkConfigInfo = {
 			"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
 		subscriptionId: SUBSCRIPTION_ID,
 		callbackGasLimit: "500000", // 500 000
-		maxNumOfPlayers: 3,
+		// ! maxNumOfPlayers <=20, otherwise tests on local network won't work properly.
+		// ! This is because Hardhat gives 20 accounts by default.
+		maxNumOfPlayers: 6,
 	},
 };
 

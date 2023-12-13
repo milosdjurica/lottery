@@ -2,6 +2,7 @@ import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { developmentChains, networkConfig } from "../../utils/helper-config";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 
@@ -15,6 +16,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			let lottery: Lottery;
 			let deployer: string;
 			let vrfCoordinatorMock: VRFCoordinatorV2Mock;
+			let accounts: HardhatEthersSigner[];
 
 			beforeEach(async () => {
 				await deployments.fixture(["all"]);
@@ -24,6 +26,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					deployer,
 				);
 				lottery = await ethers.getContract("Lottery", deployer);
+				accounts = await ethers.getSigners();
 			});
 
 			describe("Constructor Tests", () => {
@@ -52,10 +55,9 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 
 			describe("Enter Lottery Tests", () => {
 				it("Reverts if more accounts than max number", async () => {
-					const accounts = await ethers.getSigners();
 					for (let i = 0; i < MAX_NUM_PLAYERS; i++) {
 						const lotteryConnected = lottery.connect(accounts[i]);
-						await lottery.enterLottery({ value: TICKET_PRICE });
+						await lotteryConnected.enterLottery({ value: TICKET_PRICE });
 					}
 					await expect(
 						lottery.enterLottery({
@@ -136,14 +138,20 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			// or everyone agrees to pick earlier
 			// check both
 			describe("Leave Lottery Tests", () => {
+				const NUM_OF_ACTIVE_PLAYERS = 3;
+
 				beforeEach(async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						await playerLottery.enterLottery({ value: TICKET_PRICE });
+					}
 				});
 
 				// Coverage -> 58.97 |    46.43 |    73.33 |    58.73
 				it("Reverts if player calling leave() is not in array", async () => {
 					// ! Not using deployer because he entered lottery in beforeEach
-					const playerNotInArray = (await ethers.getSigners())[1];
+					const playerNotInArray = accounts[NUM_OF_ACTIVE_PLAYERS + 1];
 					const playerLottery = lottery.connect(playerNotInArray);
 					const playerAddress = await playerNotInArray.getAddress();
 
@@ -154,5 +162,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						)
 						.withArgs(playerAddress);
 				});
+
+				it("Puts last player on index", async () => {});
+				it("Removes indexed player", async () => {});
+				it("Compare whole arrays", async () => {});
+				it("Emits event", async () => {});
+				it("Agreed to pick earlier back to NONE (because he isnt active player anymore)", async () => {});
 			});
 		});
