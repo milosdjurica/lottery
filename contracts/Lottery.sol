@@ -65,7 +65,7 @@ contract Lottery is VRFConsumerBaseV2 {
 	event WinnerPicked(address indexed winner);
 	event RequestedNumber(uint indexed requestId);
 	event PlayerLeft(address indexed player, uint indexed numPlayersLeft);
-
+	event NotEveryoneAgreesToPickEarlier();
 	////////////////////
 	// * Modifiers 	  //
 	////////////////////
@@ -162,7 +162,11 @@ contract Lottery is VRFConsumerBaseV2 {
 		if (s_playersAgreeToPickEarlier[msg.sender] == WantToStartEarly.NONE)
 			revert Lottery__PlayerNotInArray(msg.sender);
 		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.YES;
-		if (allPlayersAgreeToStartEarly()) pickWinner();
+		if (allPlayersAgreeToStartEarly()) {
+			pickWinner();
+		} else {
+			emit NotEveryoneAgreesToPickEarlier();
+		}
 		// TODO maybe emit if players dont wanna start
 		s_lotteryState = LotteryState.OPEN;
 	}

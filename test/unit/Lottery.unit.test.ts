@@ -224,6 +224,18 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						BigInt(2),
 					);
 				});
+
+				// Coverage -> 82.5 |       75 |    93.33 |    84.62
+				it("Doesn't pick winner if not everyone agrees", async () => {
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+
+						await expect(playerLottery.pickWinnerEarlier()).to.emit(
+							lottery,
+							"NotEveryoneAgreesToPickEarlier",
+						);
+					}
+				});
 			});
 
 			// for picking winner beforeEach -> when everyone is there
