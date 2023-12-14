@@ -334,7 +334,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
-				// Coverage -> 85.71 |    78.57 |     87.5 |    86.57
+				// Coverage ->  85.71 |    78.57 |     87.5 |    86.57
 				it("Can not be called before pickWinner function is called", async () => {
 					// ! Cant add revertedWithCustomError(vrfC...V2Mock, "nonexistent request")
 					// ! Because contract error comes from chainlink contract
@@ -347,6 +347,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					).to.be.revertedWith("nonexistent request");
 				});
 
+				// TODO -> Test for this
 				// Puts recent winner in s_recentWinner
 				// lottery state to OPEN
 				// deletes players
