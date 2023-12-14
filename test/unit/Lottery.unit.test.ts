@@ -227,6 +227,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 
 				// Coverage -> 82.5 |       75 |    93.33 |    84.62
 				it("Doesn't pick winner if not everyone agrees", async () => {
+					// ! Last player doesn't agree because it is -1
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
 
@@ -235,6 +236,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 							"NotEveryoneAgreesToPickEarlier",
 						);
 					}
+				});
+
+				it("Puts LotteryState back to OPEN after finished", async () => {
+					await lottery.pickWinnerEarlier();
+					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
 			});
 
