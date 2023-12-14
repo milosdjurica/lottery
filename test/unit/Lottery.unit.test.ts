@@ -240,7 +240,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				});
 
 				// Coverage -> 82.5 |       75 |    93.33 |    84.38
-				it("Puts LotteryState back to OPEN after finished", async () => {
+				it("Puts LotteryState back to OPEN after finished without picking winner", async () => {
 					await lottery.pickWinnerEarlier();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
@@ -250,7 +250,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
 
-						playerLottery.pickWinnerEarlier();
+						await playerLottery.pickWinnerEarlier();
 					}
 					const pickWinnerLottery = lottery.connect(
 						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
@@ -264,7 +264,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				it("Emits RequestedNumber event when all agree", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
-						playerLottery.pickWinnerEarlier();
+						await playerLottery.pickWinnerEarlier();
 					}
 
 					const pickWinnerLottery = lottery.connect(
@@ -281,7 +281,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				it("Puts RequestID into the event logs", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
-						playerLottery.pickWinnerEarlier();
+						await playerLottery.pickWinnerEarlier();
 					}
 					const pickWinnerLottery = lottery.connect(
 						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
@@ -294,6 +294,19 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					// logs[2] -> RequestedNumber event
 					const requestId = (txReceipt?.logs[2] as EventLog).args.requestId;
 					assert(Number(requestId > 0));
+				});
+
+				// Coverage ->  87.5 |    78.57 |    93.33 |     87.5
+				it("Puts LotteryState back to OPEN after picking winner", async () => {
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						await playerLottery.pickWinnerEarlier();
+					}
+					const pickWinnerLottery = lottery.connect(
+						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
+					);
+					await pickWinnerLottery.pickWinnerEarlier();
+					assert.equal(await pickWinnerLottery.getLotteryState(), BigInt(0));
 				});
 			});
 
