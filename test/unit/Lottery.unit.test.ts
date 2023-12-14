@@ -238,9 +238,25 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
+				// Coverage -> 82.5 |       75 |    93.33 |    84.38
 				it("Puts LotteryState back to OPEN after finished", async () => {
 					await lottery.pickWinnerEarlier();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
+				});
+
+				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
+				it("Emits PickingWinner event with LotteryState.CLOSED when all agree", async () => {
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+
+						playerLottery.pickWinnerEarlier();
+					}
+					const pickWinnerLottery = lottery.connect(
+						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
+					);
+					await expect(pickWinnerLottery.pickWinnerEarlier())
+						.to.emit(pickWinnerLottery, "PickingWinner")
+						.withArgs(BigInt(1));
 				});
 			});
 

@@ -198,7 +198,11 @@ contract Lottery is VRFConsumerBaseV2 {
 			i_callbackGasLimit,
 			NUM_WORDS
 		);
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO Check if this is vulnerability
 		emit RequestedNumber(requestId);
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		s_lotteryState = LotteryState.OPEN;
 	}
 
