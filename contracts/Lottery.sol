@@ -183,6 +183,9 @@ contract Lottery is VRFConsumerBaseV2 {
 	}
 
 	function pickWinner() internal {
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO Should return WantToStartEearly back to NONE because players arent active anymore
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		s_lotteryState = LotteryState.CLOSED;
 		emit PickingWinner(s_lotteryState);
 		uint requestId = i_vrfCoordinator.requestRandomWords(

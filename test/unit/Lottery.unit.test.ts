@@ -215,6 +215,15 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						)
 						.withArgs(playerAddress);
 				});
+
+				// Coverage ->  82.05 |       75 |    93.33 |    85.71
+				it("Should change WantToStartEarly to YES", async () => {
+					await lottery.pickWinnerEarlier();
+					assert.equal(
+						await lottery.getPlayerWantsToStart(deployer),
+						BigInt(2),
+					);
+				});
 			});
 
 			// for picking winner beforeEach -> when everyone is there
