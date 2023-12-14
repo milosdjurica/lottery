@@ -3,6 +3,7 @@ import { developmentChains, networkConfig } from "../../utils/helper-config";
 import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { EventLog } from "ethers";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 
@@ -257,6 +258,23 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					await expect(pickWinnerLottery.pickWinnerEarlier())
 						.to.emit(pickWinnerLottery, "PickingWinner")
 						.withArgs(BigInt(1));
+				});
+
+				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
+				it("Emits RequestedNumber event when all agree", async () => {
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						playerLottery.pickWinnerEarlier();
+					}
+
+					const pickWinnerLottery = lottery.connect(
+						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
+					);
+
+					await expect(pickWinnerLottery.pickWinnerEarlier()).to.emit(
+						pickWinnerLottery,
+						"RequestedNumber",
+					);
 				});
 			});
 

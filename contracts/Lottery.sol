@@ -161,6 +161,7 @@ contract Lottery is VRFConsumerBaseV2 {
 		s_lotteryState = LotteryState.CLOSED;
 		if (s_playersAgreeToPickEarlier[msg.sender] == WantToStartEarly.NONE)
 			revert Lottery__PlayerNotInArray(msg.sender);
+		// TODO Should also check if player is in array ??? -> see in notes why
 		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.YES;
 		if (allPlayersAgreeToStartEarly()) {
 			pickWinner();
