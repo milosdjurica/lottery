@@ -183,6 +183,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.to.emit(lottery, "PlayerLeft")
 						.withArgs(deployer, previousNumOfPlayers - BigInt(1));
 				});
+
+				it("Puts Lottery state back to open after leaving", async () => {
+					await lottery.leave();
+					assert.equal(await lottery.getLotteryState(), BigInt(0));
+				});
 			});
 
 			// for picking winner beforeEach -> when everyone is there
