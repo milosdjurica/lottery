@@ -66,6 +66,11 @@ contract Lottery is VRFConsumerBaseV2 {
 	event RequestedNumber(uint indexed requestId);
 	event PlayerLeft(address indexed player, uint indexed numPlayersLeft);
 	event NotEveryoneAgreesToPickEarlier();
+	event ActiveAndNeedMorePlayersNumbers(
+		uint indexed activePlayers,
+		uint indexed needMore
+	);
+
 	////////////////////
 	// * Modifiers 	  //
 	////////////////////
@@ -126,7 +131,13 @@ contract Lottery is VRFConsumerBaseV2 {
 		emit LotteryEnter(msg.sender, s_players.length);
 
 		if (s_players.length == i_maxNumOfPlayers) {
+			s_lotteryState = LotteryState.CLOSED;
 			pickWinner();
+		} else {
+			emit ActiveAndNeedMorePlayersNumbers(
+				s_players.length,
+				i_maxNumOfPlayers - s_players.length
+			);
 		}
 	}
 

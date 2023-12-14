@@ -80,7 +80,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					).to.be.revertedWithCustomError(lottery, "Lottery__NotEnoughETH");
 				});
 
-				// Coverage ->  43.24 |    35.71 |    61.54 |     45.9 |
 				it("Should return if extra money sent", async () => {
 					const deployerBalanceBefore =
 						await ethers.provider.getBalance(deployer);
@@ -100,7 +99,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage ->  43.24 |    35.71 |    61.54 |     45.9 |
 				it("Contract should only take ticket price fee", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE * BigInt(2) });
 					assert.equal(await ethers.provider.getBalance(lottery), TICKET_PRICE);
@@ -111,13 +109,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert.equal(await lottery.getPlayer(0), deployer);
 				});
 
-				// Coverage ->  44.74 |    35.71 |    64.29 |    46.77
 				it("Panic revert if accessing non-existing index", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await expect(lottery.getPlayer(1)).to.be.revertedWithPanic(0x32);
 				});
 
-				// Coverage -> 46.15 |    35.71 |    66.67 |    47.62
 				it("Player enters with WantsToStartEarly.NO", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 
@@ -127,11 +123,16 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage -> 46.15 |    35.71 |    66.67 |    47.62
 				it("Emits that player entered lottery", async () => {
 					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
 						.to.emit(lottery, "LotteryEnter")
 						.withArgs(deployer, 1);
+				});
+
+				it("Emits number of active and needed players", async () => {
+					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
+						.to.emit(lottery, "ActiveAndNeedMorePlayersNumbers")
+						.withArgs(1, MAX_NUM_PLAYERS - 1);
 				});
 			});
 
@@ -146,7 +147,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
-				// Coverage -> 58.97 |    46.43 |    73.33 |    58.73
 				it("Reverts if player calling leave() is not in array", async () => {
 					// ! Not using deployer because he entered lottery in beforeEach
 					const playerNotInArray = accounts[NUM_OF_ACTIVE_PLAYERS + 1];
@@ -161,7 +161,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(playerAddress);
 				});
 
-				// Coverage ->   66.67 |    53.57 |       80 |    71.43
 				it("Compares length of arrays before and after leaving", async () => {
 					const numBefore = await lottery.getNumOfActivePlayers();
 					await lottery.leave();
@@ -177,7 +176,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage -> 66.67 |    53.57 |       80 |    71.43
 				it("Emits event", async () => {
 					const previousNumOfPlayers = await lottery.getNumOfActivePlayers();
 					await expect(lottery.leave())
@@ -185,7 +183,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(deployer, previousNumOfPlayers - BigInt(1));
 				});
 
-				// Coverage -> 66.67 |    53.57 |       80 |    71.43
 				it("Puts Lottery state back to open after leaving", async () => {
 					await lottery.leave();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
@@ -203,7 +200,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
-				// Coverage -> 69.23 |    60.71 |    86.67 |    76.19
 				it("Should revert if caller is not active player", async () => {
 					const playerNotInArray = accounts[NUM_OF_ACTIVE_PLAYERS + 1];
 					const playerLottery = lottery.connect(playerNotInArray);
@@ -217,7 +213,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(playerAddress);
 				});
 
-				// Coverage ->  82.05 |       75 |    93.33 |    85.71
 				it("Should change WantToStartEarly to YES", async () => {
 					await lottery.pickWinnerEarlier();
 					assert.equal(
@@ -226,7 +221,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage -> 82.5 |       75 |    93.33 |    84.62
 				it("Doesn't pick winner if not everyone agrees", async () => {
 					// ! Last player doesn't agree because it is -1
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
@@ -239,13 +233,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
-				// Coverage -> 82.5 |       75 |    93.33 |    84.38
 				it("Puts LotteryState back to OPEN after finished without picking winner", async () => {
 					await lottery.pickWinnerEarlier();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
 
-				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
 				it("Emits PickingWinner event with LotteryState.CLOSED when all agree", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
@@ -260,7 +252,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(BigInt(1));
 				});
 
-				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
 				it("Emits RequestedNumber event when all agree", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
@@ -277,7 +268,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
 				it("Puts RequestID into the event logs", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
@@ -296,7 +286,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert(Number(requestId > 0));
 				});
 
-				// Coverage ->  87.5 |    78.57 |    93.33 |     87.5
 				it("Puts LotteryState back to OPEN after picking winner", async () => {
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
@@ -310,14 +299,20 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				});
 			});
 
-			// for picking winner beforeEach -> when everyone is there
-			describe("Pick Winner when MAX_NUM_OF_PLAYERS is fulfilled", () => {
+			describe("Pick Winner when MAX_NUM_PLAYERS is fulfilled", () => {
 				beforeEach(async () => {
-					// Enter with all accounts except last one
+					for (let i = 0; i < MAX_NUM_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						await playerLottery.enterLottery({ value: TICKET_PRICE });
+					}
 				});
 
-				// Add last player into array in tests
-				it("");
+				// Coverage -> 87.8 |    78.57 |    93.33 |    87.88
+				it("Emits PickingWinner event", async () => {
+					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
+						.to.emit(lottery, "PickingWinner")
+						.withArgs(BigInt(1));
+				});
 			});
 
 			// TODO fulfillRandomWords unit tests
