@@ -320,11 +320,40 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					);
 				});
 
-				// Coverage -> 87.8 |    78.57 |    93.33 |    87.88
 				it("Gets state back to OPEN after picking winner", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
+			});
+
+			describe("FulfillRandomWords Tests", () => {
+				beforeEach(async () => {
+					for (let i = 1; i < MAX_NUM_PLAYERS; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						await playerLottery.enterLottery({ value: TICKET_PRICE });
+					}
+				});
+
+				// Coverage -> 85.71 |    78.57 |     87.5 |    86.57
+				it("Can not be called before pickWinner function is called", async () => {
+					// ! Cant add revertedWithCustomError(vrfC...V2Mock, "nonexistent request")
+					// ! Because contract error comes from chainlink contract
+					await expect(
+						vrfCoordinatorMock.fulfillRandomWords(0, lottery.getAddress()),
+					).to.be.revertedWith("nonexistent request");
+					// ! Should be fuzz testing
+					await expect(
+						vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress()),
+					).to.be.revertedWith("nonexistent request");
+				});
+
+				// Puts recent winner in s_recentWinner
+				// lottery state to OPEN
+				// deletes players
+				// emits winner
+				// balance 0
+
+				it("Puts lottery state back to OPEN", async () => {});
 			});
 
 			// TODO fulfillRandomWords unit tests

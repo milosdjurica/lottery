@@ -272,4 +272,8 @@ contract Lottery is VRFConsumerBaseV2 {
 	) public view returns (WantToStartEarly) {
 		return s_playersAgreeToPickEarlier[player];
 	}
+
+	function getRecentWinner() public view returns (address) {
+		return s_recentWinner;
+	}
 }
