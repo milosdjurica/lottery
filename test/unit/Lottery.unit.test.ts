@@ -347,16 +347,14 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					).to.be.revertedWith("nonexistent request");
 				});
 
-				// TODO -> Test for this
-				// Puts recent winner in s_recentWinner
-				// lottery state to OPEN
-				// deletes players
-				// emits winner
-				// balance 0
-
 				it("Puts lottery state back to OPEN", async () => {});
 			});
 
-			// TODO fulfillRandomWords unit tests
+			// TODO -> Test for this
+			// Puts recent winner in s_recentWinner
+			// lottery state to OPEN
+			// deletes players
+			// emits winner
+			// balance 0
 			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});
