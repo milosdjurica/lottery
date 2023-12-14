@@ -276,6 +276,25 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						"RequestedNumber",
 					);
 				});
+
+				// Coverage -> 87.5 |    78.57 |    93.33 |     87.5
+				it("Puts RequestID into the event logs", async () => {
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS - 1; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						playerLottery.pickWinnerEarlier();
+					}
+					const pickWinnerLottery = lottery.connect(
+						accounts[NUM_OF_ACTIVE_PLAYERS - 1],
+					);
+					const txResponse = await pickWinnerLottery.pickWinnerEarlier();
+					const txReceipt = await txResponse.wait(1);
+
+					// logs[0] -> PickingWinner event,
+					// logs[1] -> event from requestRandomWords()
+					// logs[2] -> RequestedNumber event
+					const requestId = (txReceipt?.logs[2] as EventLog).args.requestId;
+					assert(Number(requestId > 0));
+				});
 			});
 
 			// for picking winner beforeEach -> when everyone is there
