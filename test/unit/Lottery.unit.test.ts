@@ -311,6 +311,15 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 			});
 
 			// for picking winner beforeEach -> when everyone is there
-			// or everyone agrees to pick earlier
-			// check both
+			describe("Pick Winner when MAX_NUM_OF_PLAYERS is fulfilled", () => {
+				beforeEach(async () => {
+					// Enter with all accounts except last one
+				});
+
+				// Add last player into array in tests
+				it("");
+			});
+
+			// TODO fulfillRandomWords unit tests
+			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});

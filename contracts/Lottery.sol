@@ -167,9 +167,8 @@ contract Lottery is VRFConsumerBaseV2 {
 			pickWinner();
 		} else {
 			emit NotEveryoneAgreesToPickEarlier();
+			s_lotteryState = LotteryState.OPEN;
 		}
-		// TODO maybe emit if players dont wanna start
-		s_lotteryState = LotteryState.OPEN;
 	}
 
 	////////////////////
