@@ -134,14 +134,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				});
 			});
 
-			// for picking winner beforeEach -> when everyone is there
-			// or everyone agrees to pick earlier
-			// check both
 			describe("Leave Lottery Tests", () => {
 				const NUM_OF_ACTIVE_PLAYERS = 4;
 
 				beforeEach(async () => {
-					await lottery.enterLottery({ value: TICKET_PRICE });
+					// await lottery.enterLottery({ value: TICKET_PRICE });
 					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
 						await playerLottery.enterLottery({ value: TICKET_PRICE });
@@ -170,8 +167,25 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					const numAfter = await lottery.getNumOfActivePlayers();
 					assert.equal(numBefore - BigInt(1), numAfter);
 				});
-				// it("Compare whole arrays", async () => {});
-				// it("Agreed to pick earlier back to NONE (because he isnt active player anymore)", async () => {});
-				// it("Emits event", async () => {});
+
+				it("Agreed to pick earlier back to NONE (because he isn't active player anymore)", async () => {
+					await lottery.leave();
+					assert.equal(
+						await lottery.getPlayerWantsToStart(deployer),
+						BigInt(0),
+					);
+				});
+
+				// Coverage -> 66.67 |    53.57 |       80 |    71.43
+				it("Emits event", async () => {
+					const previousNumOfPlayers = await lottery.getNumOfActivePlayers();
+					await expect(lottery.leave())
+						.to.emit(lottery, "PlayerLeft")
+						.withArgs(deployer, previousNumOfPlayers - BigInt(1));
+				});
 			});
+
+			// for picking winner beforeEach -> when everyone is there
+			// or everyone agrees to pick earlier
+			// check both
 		});
