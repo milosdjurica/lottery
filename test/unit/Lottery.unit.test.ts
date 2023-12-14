@@ -184,9 +184,36 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(deployer, previousNumOfPlayers - BigInt(1));
 				});
 
+				// Coverage -> 66.67 |    53.57 |       80 |    71.43
 				it("Puts Lottery state back to open after leaving", async () => {
 					await lottery.leave();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
+				});
+			});
+
+			describe("Pick Winner Earlier Tests", () => {
+				const NUM_OF_ACTIVE_PLAYERS = 4;
+
+				beforeEach(async () => {
+					// await lottery.enterLottery({ value: TICKET_PRICE });
+					for (let i = 0; i < NUM_OF_ACTIVE_PLAYERS; i++) {
+						const playerLottery = lottery.connect(accounts[i]);
+						await playerLottery.enterLottery({ value: TICKET_PRICE });
+					}
+				});
+
+				// Coverage -> 69.23 |    60.71 |    86.67 |    76.19
+				it("Should revert if caller is not active player", async () => {
+					const playerNotInArray = accounts[NUM_OF_ACTIVE_PLAYERS + 1];
+					const playerLottery = lottery.connect(playerNotInArray);
+					const playerAddress = await playerNotInArray.getAddress();
+
+					await expect(playerLottery.pickWinnerEarlier())
+						.to.revertedWithCustomError(
+							playerLottery,
+							"Lottery__PlayerNotInArray",
+						)
+						.withArgs(playerAddress);
 				});
 			});
 
