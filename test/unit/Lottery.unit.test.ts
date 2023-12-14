@@ -301,17 +301,29 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 
 			describe("Pick Winner when MAX_NUM_PLAYERS is fulfilled", () => {
 				beforeEach(async () => {
-					for (let i = 0; i < MAX_NUM_PLAYERS - 1; i++) {
+					for (let i = 1; i < MAX_NUM_PLAYERS; i++) {
 						const playerLottery = lottery.connect(accounts[i]);
 						await playerLottery.enterLottery({ value: TICKET_PRICE });
 					}
 				});
 
-				// Coverage -> 87.8 |    78.57 |    93.33 |    87.88
 				it("Emits PickingWinner event", async () => {
 					await expect(lottery.enterLottery({ value: TICKET_PRICE }))
 						.to.emit(lottery, "PickingWinner")
 						.withArgs(BigInt(1));
+				});
+
+				it("Emits RequestedNumber event", async () => {
+					await expect(lottery.enterLottery({ value: TICKET_PRICE })).to.emit(
+						lottery,
+						"RequestedNumber",
+					);
+				});
+
+				// Coverage -> 87.8 |    78.57 |    93.33 |    87.88
+				it("Gets state back to OPEN after picking winner", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
 			});
 
