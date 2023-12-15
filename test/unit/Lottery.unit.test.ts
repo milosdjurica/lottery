@@ -382,7 +382,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.withArgs(deployer);
 				});
 
-				// Coverage ->  100 |    82.14 |      100 |      100
 				it("Puts recent winner in s_recentWinner after winning lottery", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
@@ -410,7 +409,42 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						await ethers.provider.getBalance(accounts[3]),
 					);
 				});
+
+				// Coverage ->  100 |    82.14 |      100 |      100
+				it("Gives money to winner", async () => {
+					const STARTING_BALANCE = await ethers.provider.getBalance(deployer);
+					const txResponse = await lottery.enterLottery({
+						value: TICKET_PRICE,
+					});
+					const txReceipt = await txResponse.wait(1);
+					const gasPrice1 = txReceipt?.gasPrice!;
+					const gasUsed1 = txReceipt?.gasUsed!;
+					const totalCost1 = gasUsed1 * gasPrice1;
+
+					const fulfillRandomWordsResponse =
+						await vrfCoordinatorMock.fulfillRandomWords(
+							1,
+							lottery.getAddress(),
+						);
+
+					const fulfillRandomWordsReceipt =
+						await fulfillRandomWordsResponse.wait(1);
+					const gasUsed2 = fulfillRandomWordsReceipt?.gasUsed!;
+					const gasPrice2 = fulfillRandomWordsReceipt?.gasPrice!;
+					const totalCost2 = gasUsed2 * gasPrice2;
+
+					const totalCost = totalCost1 + totalCost2;
+					const realBalance = await ethers.provider.getBalance(deployer);
+					const expectedBalance =
+						STARTING_BALANCE -
+						totalCost +
+						BigInt(MAX_NUM_PLAYERS - 1) * TICKET_PRICE;
+
+					assert.equal(realBalance, expectedBalance);
+				});
 			});
 
+			// TODO -> Test for this
+			// balance 0
 			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});
