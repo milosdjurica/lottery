@@ -222,12 +222,18 @@ contract Lottery is VRFConsumerBaseV2 {
 		uint, // requestId,
 		uint[] memory randomWords
 	) internal override {
+		s_lotteryState = LotteryState.CLOSED;
 		uint winnerIndex = randomWords[0] % s_players.length;
 		address payable recentWinner = s_players[winnerIndex];
 		s_recentWinner = recentWinner;
-		s_lotteryState = LotteryState.OPEN;
+		// ! Because players aren't active anymore, getting their WantToStartEarly back to NONE
+		uint length = s_players.length;
+		for (uint i = 0; i < length; i++) {
+			s_playersAgreeToPickEarlier[s_players[i]] = WantToStartEarly.NONE;
+		}
 		delete s_players;
 		emit WinnerPicked(recentWinner);
+		s_lotteryState = LotteryState.OPEN;
 		(bool success, ) = recentWinner.call{value: address(this).balance}("");
 		if (!success) revert Lottery__TransferFailed();
 	}

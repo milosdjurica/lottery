@@ -4,6 +4,7 @@ import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { EventLog } from "ethers";
+import { TypedContractEvent } from "../../typechain-types/common";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 
@@ -347,7 +348,12 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					).to.be.revertedWith("nonexistent request");
 				});
 
-				it("Puts lottery state back to OPEN", async () => {});
+				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
+				it("LotteryState back to OPEN after picking winner", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+					assert.equal(await lottery.getLotteryState(), BigInt(0));
+				});
 			});
 
 			// TODO -> Test for this
