@@ -366,11 +366,21 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					}
 				});
 
-				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
 				it("Deletes all players from array", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
 					assert.equal(await lottery.getNumOfActivePlayers(), BigInt(0));
+				});
+
+				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
+				it("Emits WinnerPicked event", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+
+					await expect(
+						vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress()),
+					)
+						.to.emit(lottery, "WinnerPicked")
+						.withArgs(deployer);
 				});
 			});
 
