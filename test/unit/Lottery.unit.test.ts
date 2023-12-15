@@ -372,7 +372,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert.equal(await lottery.getNumOfActivePlayers(), BigInt(0));
 				});
 
-				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
 				it("Emits WinnerPicked event", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 
@@ -382,13 +381,16 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						.to.emit(lottery, "WinnerPicked")
 						.withArgs(deployer);
 				});
+
+				// Coverage ->  100 |    82.14 |      100 |      100
+				it("Puts recent winner in s_recentWinner after winning lottery", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+					assert.equal(deployer, await lottery.getRecentWinner());
+				});
 			});
 
 			// TODO -> Test for this
-			// Puts recent winner in s_recentWinner
-
-			// deletes players
-			// emits winner
 			// balance 0
 			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});
