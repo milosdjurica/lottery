@@ -388,6 +388,12 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
 					assert.equal(deployer, await lottery.getRecentWinner());
 				});
+
+				it("Sets balance for contract to 0", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+					assert.equal(await ethers.provider.getBalance(lottery), BigInt(0));
+				});
 			});
 
 			// TODO -> Test for this
