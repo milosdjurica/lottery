@@ -398,6 +398,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					// ! Already paid ticket and gas in beforeEach
 					const STARTING_BALANCE_AFTER_PAYING_TICKET =
 						await ethers.provider.getBalance(accounts[3]);
+					// ! Deployer (winner) is entering
 					await lottery.enterLottery({
 						value: TICKET_PRICE,
 					});
@@ -412,6 +413,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 
 				// Coverage ->  100 |    82.14 |      100 |      100
 				it("Gives money to winner", async () => {
+					// ! Balance before entering
 					const STARTING_BALANCE = await ethers.provider.getBalance(deployer);
 					const txResponse = await lottery.enterLottery({
 						value: TICKET_PRICE,
@@ -419,6 +421,7 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					const txReceipt = await txResponse.wait(1);
 					const gasPrice1 = txReceipt?.gasPrice!;
 					const gasUsed1 = txReceipt?.gasUsed!;
+					// ! Gas paid to enter lottery
 					const totalCost1 = gasUsed1 * gasPrice1;
 
 					const fulfillRandomWordsResponse =
@@ -426,11 +429,11 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 							1,
 							lottery.getAddress(),
 						);
-
 					const fulfillRandomWordsReceipt =
 						await fulfillRandomWordsResponse.wait(1);
 					const gasUsed2 = fulfillRandomWordsReceipt?.gasUsed!;
 					const gasPrice2 = fulfillRandomWordsReceipt?.gasPrice!;
+					// !  Gas paid to pick winner -> contract pays for this from prize money
 					const totalCost2 = gasUsed2 * gasPrice2;
 
 					const totalCost = totalCost1 + totalCost2;
