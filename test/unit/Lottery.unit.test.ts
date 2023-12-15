@@ -4,7 +4,6 @@ import { Lottery, VRFCoordinatorV2Mock } from "../../typechain-types";
 import { assert, expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { EventLog } from "ethers";
-import { TypedContractEvent } from "../../typechain-types/common";
 
 const isDevelopmentChain = developmentChains.includes(network.name);
 

@@ -9,4 +9,4 @@ coverage
 README.md
 # For conventions.md
 *.md
-coverage.json
+# coverage.json

@@ -64,7 +64,7 @@ const deployLottery: DeployFunction = async function (
 
 	if (!IS_DEV_CHAIN && process.env.ETHERSCAN_API_KEY) {
 		log("Verifying contract....");
-		verify(lottery.address, constructorArgs);
+		await verify(lottery.address, constructorArgs);
 	} else {
 		// ! Have to add consumer to Mock in order to work
 		if (!vrfCoordinatorV2Mock!)

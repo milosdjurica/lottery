@@ -25,7 +25,7 @@ export const networkConfig: NetworkConfigInfo = {
 			"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
 		subscriptionId: SUBSCRIPTION_ID,
 		callbackGasLimit: "500000", // 500 000
-		maxNumOfPlayers: 3,
+		maxNumOfPlayers: 2,
 	},
 	31337: {
 		name: "hardhat",
