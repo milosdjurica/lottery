@@ -26,6 +26,8 @@ isDevelopmentChain
 				playerAccount = accounts[1];
 			});
 
+			// TODO -> add more tests
+			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 			describe("FulfillRandomWords Staging Tests", () => {
 				it("Works with Chainlink VRF, picks random winner, and after that puts LotteryState to OPEN, removes players from array, and resets mapping WantsToPickEarly to NONE", async () => {
 					const event = lottery.getEvent("WinnerPicked");

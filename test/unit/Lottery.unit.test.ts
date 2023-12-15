@@ -188,7 +188,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
 
-				// TODO -> implement this in contract, and do test for this !!!
 				it("Gives user back his money after he leaves", async () => {
 					const balanceBefore = await ethers.provider.getBalance(deployer);
 					const txTransaction = await lottery.leave();
@@ -458,8 +457,4 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert.equal(realBalance, expectedBalance);
 				});
 			});
-
-			// TODO -> Test for this
-			// balance 0
-			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});
