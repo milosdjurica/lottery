@@ -158,7 +158,8 @@ contract Lottery is VRFConsumerBaseV2 {
 
 		if (indexToRemove > playersLength)
 			revert Lottery__PlayerNotInArray(msg.sender);
-
+		// TODO -> give user back his money
+		// TODO -> maybe not give full ticket value, check if full value ruins balance for others
 		// ! Put last acc in place of acc that should be removed and pop() duplicate
 		s_players[indexToRemove] = s_players[playersLength - 1];
 		s_players.pop();

@@ -188,6 +188,9 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					await lottery.leave();
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
+
+				// TODO -> implement this in contract, and do test for this !!!
+				it("Gives user back his money after he leaves", async () => {});
 			});
 
 			describe("Pick Winner Earlier Tests", () => {
