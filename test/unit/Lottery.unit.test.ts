@@ -190,7 +190,17 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 				});
 
 				// TODO -> implement this in contract, and do test for this !!!
-				it("Gives user back his money after he leaves", async () => {});
+				it("Gives user back his money after he leaves", async () => {
+					const balanceBefore = await ethers.provider.getBalance(deployer);
+					const txTransaction = await lottery.leave();
+					const txReceipt = await txTransaction.wait(1);
+					const gasUsed = txReceipt?.gasUsed!!!!!;
+					const gasPrice = txReceipt?.gasPrice!!!!!;
+					const totalCost = gasUsed * gasPrice;
+
+					const balanceAfter = await ethers.provider.getBalance(deployer);
+					assert.equal(balanceAfter, balanceBefore + TICKET_PRICE - totalCost);
+				});
 			});
 
 			describe("Pick Winner Earlier Tests", () => {

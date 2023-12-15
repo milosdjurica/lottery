@@ -158,15 +158,17 @@ contract Lottery is VRFConsumerBaseV2 {
 
 		if (indexToRemove > playersLength)
 			revert Lottery__PlayerNotInArray(msg.sender);
-		// TODO -> give user back his money
-		// TODO -> maybe not give full ticket value, check if full value ruins balance for others
+
+		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.NONE;
+		emit PlayerLeft(msg.sender, playersLength - 1);
+		address userLeaving = s_players[indexToRemove];
 		// ! Put last acc in place of acc that should be removed and pop() duplicate
 		s_players[indexToRemove] = s_players[playersLength - 1];
 		s_players.pop();
-		emit PlayerLeft(msg.sender, playersLength - 1);
 		// Have to put it back to NONE so he cant call pick early when he is not in lottery
-		s_playersAgreeToPickEarlier[msg.sender] = WantToStartEarly.NONE;
 		s_lotteryState = LotteryState.OPEN;
+		(bool success, ) = userLeaving.call{value: i_ticketPrice}("");
+		if (!success) revert Lottery__TransactionFailed();
 	}
 
 	function pickWinnerEarlier() external stateIsOpen {
