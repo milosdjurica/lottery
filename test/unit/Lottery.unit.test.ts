@@ -348,11 +348,23 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					).to.be.revertedWith("nonexistent request");
 				});
 
-				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
 				it("LotteryState back to OPEN after picking winner", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
+				});
+
+				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
+				it("Puts WantsToStartEarly back to NONE after picking winner", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+
+					for (let i = 0; i < MAX_NUM_PLAYERS + 1; i++) {
+						assert.equal(
+							await lottery.getPlayerWantsToStart(accounts[i].address),
+							BigInt(0),
+						);
+					}
 				});
 			});
 
