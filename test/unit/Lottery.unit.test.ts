@@ -394,9 +394,23 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
 					assert.equal(await ethers.provider.getBalance(lottery), BigInt(0));
 				});
+
+				it("Takes money from players", async () => {
+					// ! Already paid ticket and gas in beforeEach
+					const STARTING_BALANCE_AFTER_PAYING_TICKET =
+						await ethers.provider.getBalance(accounts[3]);
+					await lottery.enterLottery({
+						value: TICKET_PRICE,
+					});
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+
+					// ! When winner is picked, his balance should not change, since he didn't win
+					assert.equal(
+						STARTING_BALANCE_AFTER_PAYING_TICKET,
+						await ethers.provider.getBalance(accounts[3]),
+					);
+				});
 			});
 
-			// TODO -> Test for this
-			// balance 0
 			// TODO integration tests -> user leaves and enters again, add other after someone leaves, etc...
 		});
