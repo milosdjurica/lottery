@@ -354,7 +354,6 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 					assert.equal(await lottery.getLotteryState(), BigInt(0));
 				});
 
-				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
 				it("Puts WantsToStartEarly back to NONE after picking winner", async () => {
 					await lottery.enterLottery({ value: TICKET_PRICE });
 					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
@@ -366,11 +365,18 @@ const isDevelopmentChain = developmentChains.includes(network.name);
 						);
 					}
 				});
+
+				// Coverage -> 97.73 |    82.14 |    93.75 |    98.59
+				it("Deletes all players from array", async () => {
+					await lottery.enterLottery({ value: TICKET_PRICE });
+					await vrfCoordinatorMock.fulfillRandomWords(1, lottery.getAddress());
+					assert.equal(await lottery.getNumOfActivePlayers(), BigInt(0));
+				});
 			});
 
 			// TODO -> Test for this
 			// Puts recent winner in s_recentWinner
-			// lottery state to OPEN
+
 			// deletes players
 			// emits winner
 			// balance 0
